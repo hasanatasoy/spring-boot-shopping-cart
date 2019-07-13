@@ -1,25 +1,26 @@
-package com.hasanatasoy.shoppingcart.domain.product.color;
-
+package com.hasanatasoy.shoppingcart.domain.user.role;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
 @Setter
-public class ProductColor {
+@NoArgsConstructor
+public class UserRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @NotNull
-    private String imageUrl = "This part empty for now";
-    @NotNull
-    private String colorName;
+    private RoleName roleName;
+
+    public UserRole(RoleName roleName){
+        this.roleName = roleName;
+    }
 }

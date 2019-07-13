@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -30,8 +32,13 @@ public class UserController {
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public Response<?> register(@Valid @RequestBody RegisterDTO registerDTO, BindingResult bindingResult){
 
-        if(bindingResult.hasErrors())
-            return new Response<>(false, HttpStatus.BAD_REQUEST.value(), bindingResult.toString(), UserValid.ERROR);
+        if(bindingResult.hasErrors()){
+            List<String> errors = new ArrayList<>();
+            bindingResult.getFieldErrors().forEach(error -> {
+                errors.add(error.getField());
+            });
+            return new Response<>(false, HttpStatus.BAD_REQUEST.value(), "Valid not correct : "+errors.toString(), UserValid.ERROR);
+        }
         if(userService.isEmailAlreadyTaken(registerDTO.getEmail()))
             return new Response<>(false, HttpStatus.BAD_REQUEST.value(), "Email already taken", UserRegisterResult.EXISTEMAIL);
         userService.createNewUser(registerDTO);
@@ -45,6 +52,7 @@ public class UserController {
             return new Response<>(false, HttpStatus.BAD_REQUEST.value(), bindingResult.toString(), UserValid.ERROR);
         UserLoginResult userLoginResult = userService.getResultIsEmailAndPasswordCorrect(loginDTO);
         if(userLoginResult.equals(UserLoginResult.CORRECT)){
+            System.out.println("4");
             String JsonWebToken = userService.createJsonWebToken(loginDTO);
             return new Response<>(true, HttpStatus.OK.value(), "Login is successfully.", JsonWebToken);
         }
@@ -54,7 +62,9 @@ public class UserController {
             return new Response<>(false, HttpStatus.FORBIDDEN.value(), "Password is not correct", UserLoginResult.UNCORRECTPASSWORD);
         else if(userLoginResult.equals(UserLoginResult.UNCORRECTEMAIL))
             return new Response<>(false, HttpStatus.FORBIDDEN.value(), "Email is not correct", UserLoginResult.UNCORRECTEMAIL);
-        else
+        else if(userLoginResult.equals(UserLoginResult.NOTFOUNDEMAIL))
             return new Response<>(false, HttpStatus.NOT_FOUND.value(), "There is no account for this email", UserLoginResult.NOTFOUNDEMAIL);
+        else
+            return new Response<>(false, HttpStatus.FORBIDDEN.value(), "Please check your email for activation", UserLoginResult.INACTIVEACCOUNT);
     }
 }

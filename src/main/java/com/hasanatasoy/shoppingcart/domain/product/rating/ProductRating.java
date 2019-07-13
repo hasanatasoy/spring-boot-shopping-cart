@@ -8,13 +8,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@Entity(name = "ProductRating")
+@Entity
 @Getter
 @Setter
 public class ProductRating {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @OneToMany
     private List<ProductComment> productComments;

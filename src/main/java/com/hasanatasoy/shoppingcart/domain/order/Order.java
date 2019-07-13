@@ -10,20 +10,20 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity(name = "Order")
+@Entity
+@Table(name = "orders")
 @Getter
 @Setter
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @OneToOne
     private Address orderAddress;
     @OneToOne
     private Address invoiceAddress;
-    @ElementCollection
-    @CollectionTable(name = "Cart",joinColumns = @JoinColumn(name = "Order_id"))
+    @OneToOne
     private Cart cart;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;

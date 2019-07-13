@@ -7,14 +7,19 @@ import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfo;
 import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfoRepository;
 import com.hasanatasoy.shoppingcart.domain.user.info.UserInfo;
 import com.hasanatasoy.shoppingcart.domain.user.info.UserInfoRepository;
+import com.hasanatasoy.shoppingcart.domain.user.role.RoleName;
+import com.hasanatasoy.shoppingcart.domain.user.role.UserRole;
+import com.hasanatasoy.shoppingcart.domain.user.role.UserRoleRepository;
 import com.hasanatasoy.shoppingcart.dto.login.LoginDTO;
 import com.hasanatasoy.shoppingcart.dto.register.RegisterDTO;
 import com.hasanatasoy.shoppingcart.enums.user.UserLoginResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class UserService {
 
     @Autowired
@@ -23,6 +28,8 @@ public class UserService {
     private UserAuthInfoRepository userAuthInfoRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
+    @Autowired
+    private UserRoleRepository userRoleRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -34,25 +41,29 @@ public class UserService {
     }
 
     public void createNewUser(RegisterDTO registerDTO) {
+
         String encodedPassword = passwordEncoder.encode(registerDTO.getPassword());
         UserAuthInfo userAuthInfo = new UserAuthInfo(registerDTO.getEmail(), encodedPassword);
         userAuthInfoRepository.save(userAuthInfo);
         UserInfo userInfo = new UserInfo(registerDTO.getUserGender());
         userInfoRepository.save(userInfo);
-        User user = new User(userAuthInfo, userInfo);
+        UserRole userRole = userRoleRepository.findByRoleName(RoleName.Client);
+        User user = new User(userAuthInfo, userInfo, userRole);
         userRepository.save(user);
     }
 
 
     public UserLoginResult getResultIsEmailAndPasswordCorrect(LoginDTO loginDTO) {
-        String encodedPassword = passwordEncoder.encode(loginDTO.getPassword());
-        loginDTO.setPassword(encodedPassword);
+
         Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(loginDTO.getEmail());
+        User user = userRepository.findByUserAuthInfo(userAuthInfo.get()).get();
+        if(!user.isAccountEnabled())
+            return UserLoginResult.INACTIVEACCOUNT;
         if(userAuthInfo.isPresent()){
             boolean isEmailAndPasswordCorrect = userAuthInfo.get().getEmail().equals(loginDTO.getEmail())
-                                                && userAuthInfo.get().getPassword().equals(loginDTO.getPassword());
+                                                && passwordEncoder.matches(loginDTO.getPassword(), userAuthInfo.get().getPassword());
             boolean isEmailCorrect = userAuthInfo.get().getEmail().equals(loginDTO.getEmail());
-            boolean isPasswordCorrect = userAuthInfo.get().getPassword().equals(loginDTO.getPassword());
+            boolean isPasswordCorrect = passwordEncoder.matches(loginDTO.getPassword(), userAuthInfo.get().getPassword());
             if(isEmailAndPasswordCorrect)
                 return UserLoginResult.CORRECT;
             else if(isEmailCorrect)
@@ -67,6 +78,7 @@ public class UserService {
     }
 
     public String createJsonWebToken(LoginDTO loginDTO) {
+
         return jwtProvider.generateJsonWebToken(loginDTO);
     }
 }

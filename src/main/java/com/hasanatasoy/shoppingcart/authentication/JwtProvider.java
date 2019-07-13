@@ -11,9 +11,9 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    @Value("${secret-key}")
+    @Value("$(secret-key)")
     private String secretKey;
-    private final int expiration = 300000;
+    private int expiration = 300000;
 
     public String generateJsonWebToken(LoginDTO loginDTO){
         return Jwts.builder()
@@ -24,7 +24,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public LoginDTO getLoginDtoFromToken(String token){
+    public LoginDTO getLoginDtoFrom(String token){
         String subject = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         String[] login = subject.split(" ");
         return new LoginDTO(login[0],login[1]);
@@ -40,8 +40,8 @@ public class JwtProvider {
         }
     }
 
-    public boolean isExpiration(String token){
+    public boolean isExpirationPassed(String token){
         Date expiration = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getExpiration();
-        return expiration.getTime() <= new Date().getTime();
+        return expiration.getTime() < new Date().getTime();
     }
 }

@@ -4,16 +4,17 @@ import com.hasanatasoy.shoppingcart.domain.user.User;
 import com.hasanatasoy.shoppingcart.domain.user.UserRepository;
 import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfo;
 import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfoRepository;
-import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 
+@Service
 public class EmailVerificationService {
 
-    private String URL = "localhost:8080/client/verify/email/";
+    private String URL = "localhost:8080/verify/email/";
     private String encodedEmail;
 
     @Autowired
@@ -27,8 +28,7 @@ public class EmailVerificationService {
     }
 
     private String encodeBase64(String toBeEncoded) {
-        String encoded = Base64.getEncoder().encodeToString(toBeEncoded.getBytes());
-        return Base64.getEncoder().encodeToString(encoded.getBytes());
+        return Base64.getEncoder().encodeToString(toBeEncoded.getBytes());
     }
 
     private void sendEmailWithVerificationPath(String verificationPath) {
@@ -36,18 +36,19 @@ public class EmailVerificationService {
     }
 
     public String decodeBase64(String toBeDecoded){
-        String decoded = Arrays.toString(Base64.getDecoder().decode(toBeDecoded));
-        return Arrays.toString(Base64.getDecoder().decode(decoded));
+        byte[] decodedByteArray = Base64.getDecoder().decode(toBeDecoded.getBytes());
+        return new String(decodedByteArray);
     }
 
     public boolean isEmailMatched(String email){
         Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(email);
-        return userAuthInfo.map(authInfo -> authInfo.getEmail().equals(email)).orElse(false);
+        return userAuthInfo.isPresent();
     }
 
     public void setUserAccountActive(String email){
         UserAuthInfo userAuthInfo = userAuthInfoRepository.findByEmail(email).get();
         User user = userRepository.findByUserAuthInfo(userAuthInfo).get();
         user.setAccountEnabled(true);
+        userRepository.save(user);
     }
 }
