@@ -1,14 +1,13 @@
 package com.hasanatasoy.shoppingcart.controller;
 
 import com.hasanatasoy.shoppingcart.authentication.Crypt;
+import com.hasanatasoy.shoppingcart.authentication.JwtProvider;
 import com.hasanatasoy.shoppingcart.base.domain.Response;
-import com.hasanatasoy.shoppingcart.domain.user.User;
 import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfo;
 import com.hasanatasoy.shoppingcart.dto.login.LoginDTO;
 import com.hasanatasoy.shoppingcart.dto.register.RegisterDTO;
 import com.hasanatasoy.shoppingcart.enums.user.UserResponse;
 import com.hasanatasoy.shoppingcart.service.EmailService;
-import com.hasanatasoy.shoppingcart.service.JsonWebTokenService;
 import com.hasanatasoy.shoppingcart.service.user.UserAuthInfoService;
 import com.hasanatasoy.shoppingcart.service.user.UserService;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -33,7 +32,7 @@ public class AuthenticationController {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private JsonWebTokenService jsonWebTokenService;
+    private JwtProvider jsonWebTokenProvider;
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public Response<?> register(@Valid @RequestBody RegisterDTO registerDTO, BindingResult bindingResult){
@@ -54,11 +53,10 @@ public class AuthenticationController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public Response<?> login(@Valid @RequestBody LoginDTO loginDTO, BindingResult bindingResult){
-        if(bindingResult.hasErrors())
-            return new Response<>(false, HttpStatus.BAD_REQUEST.value(), bindingResult.toString(), UserResponse.VALIDERROR);
+
         UserResponse userResponse = userService.getResultIsEmailAndPasswordCorrect(loginDTO);
         if(userResponse.equals(UserResponse.CORRECT)){
-            String JsonWebToken = jsonWebTokenService.createJsonWebToken(loginDTO);
+            String JsonWebToken = jsonWebTokenProvider.generateJsonWebToken(loginDTO);
             return new Response<>(true, HttpStatus.OK.value(), "Login is successfully.", JsonWebToken);
         }
         else if(userResponse.equals(UserResponse.UNCORRECTBOTH))
@@ -73,8 +71,9 @@ public class AuthenticationController {
             return new Response<>(false, HttpStatus.FORBIDDEN.value(), "Please check your email for activation", UserResponse.INACTIVEACCOUNT);
     }
 
-    @RequestMapping(value = "/forgatpass/{email}", method = RequestMethod.GET)
-    public Response<?> forgatPassword(@RequestParam String email){
+    @RequestMapping(value = "/forgatpass", method = RequestMethod.POST)
+    public Response<?> forgatPassword(@RequestBody String email){
+        System.out.println(email);
         boolean valid = EmailValidator.getInstance().isValid(email);
         if(!valid)
             return new Response<>(false, HttpStatus.BAD_REQUEST.value(), "Email is invalid type", UserResponse.VALIDERROR);
@@ -89,13 +88,16 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/resetpass/{authId}/{secureCode}/{newpass}", method = RequestMethod.GET)
-    public Response<?> resetPassword(@PathVariable Long id, @PathVariable String secureCode, @PathVariable String newPassword){
+    public Response<?> resetPassword(@PathVariable("authId") Long id, @PathVariable("secureCode") String secureCode, @PathVariable("newpass") String newPassword){
         Optional<UserAuthInfo> userAuthInfo = userAuthInfoService.findBy(id);
         if(userAuthInfo.isPresent()){
             String email = userAuthInfo.get().getEmail();
             String hashingEmail = Crypt.hash(email);
             if(hashingEmail.equals(secureCode)){
-                userAuthInfo.get().setPassword(newPassword);
+                String passwordHash = userService.encode(newPassword);
+                // this part must be something passwordService Crypt or something like that not userService
+                // maybe hash process should be in setPassword() think later
+                userAuthInfo.get().setPassword(passwordHash);
                 userAuthInfoService.save(userAuthInfo.get());
                 return new Response<>(true, HttpStatus.OK.value(), "Password is successfully changed", UserResponse.SUCCESS);
             }

@@ -14,6 +14,7 @@ public class Crypt {
     }
 
     public static String hash(String target){
-        return "SOMEHASHINGSTRINGWITH"+target;
+        return "SOMEHASHINGSTRINGWITHEMAIL";
     }
+
 }

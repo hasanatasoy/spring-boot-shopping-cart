@@ -63,10 +63,10 @@ public class UserService {
     public UserResponse getResultIsEmailAndPasswordCorrect(LoginDTO loginDTO) {
 
         Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(loginDTO.getEmail());
-        User user = userRepository.findByUserAuthInfo(userAuthInfo.get()).get();
-        if(!user.isAccountEnabled())
-            return UserResponse.INACTIVEACCOUNT;
         if(userAuthInfo.isPresent()){
+            Optional<User> user = userRepository.findByUserAuthInfo(userAuthInfo.get());
+            if(user.isPresent() && !user.get().isAccountEnabled())
+                return UserResponse.INACTIVEACCOUNT;
             boolean isEmailAndPasswordCorrect = userAuthInfo.get().getEmail().equals(loginDTO.getEmail())
                                                 && passwordEncoder.matches(loginDTO.getPassword(), userAuthInfo.get().getPassword());
             boolean isEmailCorrect = userAuthInfo.get().getEmail().equals(loginDTO.getEmail());
@@ -82,6 +82,10 @@ public class UserService {
         }
         else
             return UserResponse.NOTFOUND;
+    }
+
+    public String encode(String password){
+        return passwordEncoder.encode(password);
     }
 
 }

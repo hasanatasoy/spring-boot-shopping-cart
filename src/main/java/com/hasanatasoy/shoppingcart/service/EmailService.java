@@ -52,7 +52,7 @@ public class EmailService {
     }
 
     public void sendResetPasswordPageWith(String targetEmail, Long authId, String secureCode) {
-        System.out.println(URL+"/resetpass/"+authId+"/"+secureCode);
+        System.out.println(URL+"/authentication/resetpass/"+authId+"/"+secureCode);
     }
 
 }

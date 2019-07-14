@@ -20,7 +20,7 @@ public class EmailVerificationController {
         boolean isMatched = emailVerificationService.isEmailMatched(email);
         if(isMatched){
             emailVerificationService.setUserAccountActive(email);
-            return "HOME PAGE";
+            return "YOUR ACCOUNT ACTIVE NOW";
         }
         return "UNAUTHORIZED";
     }
