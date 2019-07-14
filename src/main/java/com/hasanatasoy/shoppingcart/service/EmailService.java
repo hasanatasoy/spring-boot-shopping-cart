@@ -12,26 +12,25 @@ import java.util.Base64;
 import java.util.Optional;
 
 @Service
-public class EmailVerificationService {
+public class EmailService {
 
-    private String URL = "localhost:8080/verify/email/";
-    private String encodedEmail;
+    private String URL = "localhost:8080";
 
     @Autowired
     UserRepository userRepository;
     @Autowired
     UserAuthInfoRepository userAuthInfoRepository;
 
-    public void sendEmailVerification(String email) {
-        encodedEmail = encodeBase64(email);
-        sendEmailWithVerificationPath(URL+encodedEmail);
+    public void sendEmailVerificationTo(String email) {
+        String encodedEmail = encodeBase64(email);
+        sendEmailWith(URL+"/verify/email/"+encodedEmail);
     }
 
     private String encodeBase64(String toBeEncoded) {
         return Base64.getEncoder().encodeToString(toBeEncoded.getBytes());
     }
 
-    private void sendEmailWithVerificationPath(String verificationPath) {
+    private void sendEmailWith(String verificationPath) {
         System.out.println(verificationPath);
     }
 
@@ -40,8 +39,8 @@ public class EmailVerificationService {
         return new String(decodedByteArray);
     }
 
-    public boolean isEmailMatched(String email){
-        Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(email);
+    public boolean isEmailMatched(String targetEmail){
+        Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(targetEmail);
         return userAuthInfo.isPresent();
     }
 
@@ -51,4 +50,9 @@ public class EmailVerificationService {
         user.setAccountEnabled(true);
         userRepository.save(user);
     }
+
+    public void sendResetPasswordPageWith(String targetEmail, Long authId, String secureCode) {
+        System.out.println(URL+"/resetpass/"+authId+"/"+secureCode);
+    }
+
 }

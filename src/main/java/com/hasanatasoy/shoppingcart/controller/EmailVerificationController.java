@@ -1,6 +1,6 @@
 package com.hasanatasoy.shoppingcart.controller;
 
-import com.hasanatasoy.shoppingcart.service.EmailVerificationService;
+import com.hasanatasoy.shoppingcart.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmailVerificationController {
 
     @Autowired
-    private EmailVerificationService emailVerificationService;
+    private EmailService emailVerificationService;
 
     @RequestMapping(value = "/{token}", method = RequestMethod.GET)
     public String verification(@PathVariable String token){
@@ -24,4 +24,5 @@ public class EmailVerificationController {
         }
         return "UNAUTHORIZED";
     }
+
 }

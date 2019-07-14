@@ -17,7 +17,7 @@ public class RegisterDTO {
     @Size(min = 11, max = 50)
     private String email;
     @NotNull
-    @Size(min = 6, max = 25)
+    @Size(min = 6, max = 26)
     private String password;
     @NotNull
     private UserGender userGender;

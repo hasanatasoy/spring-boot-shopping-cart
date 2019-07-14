@@ -1,4 +1,4 @@
-package com.hasanatasoy.shoppingcart.service;
+package com.hasanatasoy.shoppingcart.service.user;
 
 import com.hasanatasoy.shoppingcart.authentication.JwtProvider;
 import com.hasanatasoy.shoppingcart.domain.user.User;
@@ -12,7 +12,7 @@ import com.hasanatasoy.shoppingcart.domain.user.role.UserRole;
 import com.hasanatasoy.shoppingcart.domain.user.role.UserRoleRepository;
 import com.hasanatasoy.shoppingcart.dto.login.LoginDTO;
 import com.hasanatasoy.shoppingcart.dto.register.RegisterDTO;
-import com.hasanatasoy.shoppingcart.enums.user.UserLoginResult;
+import com.hasanatasoy.shoppingcart.enums.user.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,9 +35,16 @@ public class UserService {
     @Autowired
     private JwtProvider jwtProvider;
 
-    public boolean isEmailAlreadyTaken(String email) {
+    public User findBy(UserAuthInfo userAuthInfo){
+        return userRepository.findByUserAuthInfo(userAuthInfo).get();
+    }
 
-        return userAuthInfoRepository.findByEmail(email).isPresent();
+    public User findBy(UserInfo userInfo){
+        return userRepository.findByUserInfo(userInfo).get();
+    }
+
+    public Optional<User> findBy(Long id){
+        return userRepository.findById(id);
     }
 
     public void createNewUser(RegisterDTO registerDTO) {
@@ -53,32 +60,28 @@ public class UserService {
     }
 
 
-    public UserLoginResult getResultIsEmailAndPasswordCorrect(LoginDTO loginDTO) {
+    public UserResponse getResultIsEmailAndPasswordCorrect(LoginDTO loginDTO) {
 
         Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(loginDTO.getEmail());
         User user = userRepository.findByUserAuthInfo(userAuthInfo.get()).get();
         if(!user.isAccountEnabled())
-            return UserLoginResult.INACTIVEACCOUNT;
+            return UserResponse.INACTIVEACCOUNT;
         if(userAuthInfo.isPresent()){
             boolean isEmailAndPasswordCorrect = userAuthInfo.get().getEmail().equals(loginDTO.getEmail())
                                                 && passwordEncoder.matches(loginDTO.getPassword(), userAuthInfo.get().getPassword());
             boolean isEmailCorrect = userAuthInfo.get().getEmail().equals(loginDTO.getEmail());
             boolean isPasswordCorrect = passwordEncoder.matches(loginDTO.getPassword(), userAuthInfo.get().getPassword());
             if(isEmailAndPasswordCorrect)
-                return UserLoginResult.CORRECT;
+                return UserResponse.CORRECT;
             else if(isEmailCorrect)
-                return UserLoginResult.UNCORRECTPASSWORD;
+                return UserResponse.UNCORRECTPASSWORD;
             else if(isPasswordCorrect)
-                return UserLoginResult.UNCORRECTEMAIL;
+                return UserResponse.UNCORRECTEMAIL;
             else
-                return UserLoginResult.UNCORRECTBOTH;
+                return UserResponse.UNCORRECTBOTH;
         }
         else
-            return UserLoginResult.NOTFOUNDEMAIL;
+            return UserResponse.NOTFOUND;
     }
 
-    public String createJsonWebToken(LoginDTO loginDTO) {
-
-        return jwtProvider.generateJsonWebToken(loginDTO);
-    }
 }
