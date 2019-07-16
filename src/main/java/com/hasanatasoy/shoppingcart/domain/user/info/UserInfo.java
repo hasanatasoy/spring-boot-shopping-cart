@@ -1,5 +1,6 @@
 package com.hasanatasoy.shoppingcart.domain.user.info;
 
+import com.hasanatasoy.shoppingcart.base.domain.BaseModel;
 import com.hasanatasoy.shoppingcart.domain.address.Address;
 import com.hasanatasoy.shoppingcart.domain.user.UserGender;
 import lombok.Getter;
@@ -12,14 +13,13 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@Table(name = "user_info")
+@SequenceGenerator(name = "userinfogenerator", sequenceName = "user_info_seq")
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserInfo {
+public class UserInfo extends BaseModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
     @Size(min = 1, max = 30)
     private String name;
     @Size(min = 1, max = 20)

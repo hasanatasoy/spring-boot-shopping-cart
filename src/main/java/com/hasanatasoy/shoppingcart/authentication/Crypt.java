@@ -1,20 +1,31 @@
 package com.hasanatasoy.shoppingcart.authentication;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Configuration
+import java.util.Base64;
+
 public class Crypt {
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    public static String encode(String toBeEncoded){
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.encode(toBeEncoded);
     }
 
-    public static String hash(String target){
-        return "SOMEHASHINGSTRINGWITHEMAIL";
+    public static boolean isMatched(String raw, String targetEncoded){
+        return new BCryptPasswordEncoder().matches(raw, targetEncoded);
+    }
+
+    public static String encodeBase64(String toBeEncoded) {
+        return Base64.getEncoder().encodeToString(toBeEncoded.getBytes());
+    }
+
+    public static String decodeBase64(String toBeDecoded){
+        byte[] decodedByteArray = Base64.getDecoder().decode(toBeDecoded.getBytes());
+        return new String(decodedByteArray);
+    }
+
+    public static String generateSecureCodeWith(String toBeEncoded){
+        return encode(toBeEncoded);
     }
 
 }

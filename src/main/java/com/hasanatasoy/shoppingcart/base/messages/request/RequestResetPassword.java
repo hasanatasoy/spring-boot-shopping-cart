@@ -1,6 +1,5 @@
-package com.hasanatasoy.shoppingcart.dto.register;
+package com.hasanatasoy.shoppingcart.base.messages.request;
 
-import com.hasanatasoy.shoppingcart.domain.user.UserGender;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,16 +9,13 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-public class RegisterDTO {
+public class RequestResetPassword {
 
-    @NotNull
-    @Email
-    @Size(min = 11, max = 50)
-    private String email;
     @NotNull
     @Size(min = 6, max = 26)
     private String password;
     @NotNull
-    private UserGender userGender;
-
+    @Email
+    @Size(min = 11, max = 50)
+    private String email;
 }

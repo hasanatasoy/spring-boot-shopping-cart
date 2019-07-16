@@ -1,21 +1,17 @@
 package com.hasanatasoy.shoppingcart.domain.order.shipment;
 
+import com.hasanatasoy.shoppingcart.base.domain.BaseModel;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@SequenceGenerator(name = "shipmentgenerator", sequenceName = "shipment_seq")
 @Getter
 @Setter
-public class Shipment {
+public class Shipment extends BaseModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
     private ShipmentType shipmentType;
     private int shipmentCost;
 }

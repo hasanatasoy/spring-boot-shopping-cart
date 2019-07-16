@@ -1,5 +1,8 @@
 package com.hasanatasoy.shoppingcart.controller;
 
+import com.hasanatasoy.shoppingcart.authentication.Crypt;
+import com.hasanatasoy.shoppingcart.base.messages.Response;
+import com.hasanatasoy.shoppingcart.enums.user.UserResponse;
 import com.hasanatasoy.shoppingcart.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,14 +18,12 @@ public class EmailVerificationController {
     private EmailService emailVerificationService;
 
     @RequestMapping(value = "/{token}", method = RequestMethod.GET)
-    public String verification(@PathVariable String token){
-        String email = emailVerificationService.decodeBase64(token);
-        boolean isMatched = emailVerificationService.isEmailMatched(email);
-        if(isMatched){
-            emailVerificationService.setUserAccountActive(email);
-            return "YOUR ACCOUNT ACTIVE NOW";
-        }
-        return "UNAUTHORIZED";
+    public Response<UserResponse> verification(@PathVariable String token){
+        String email = Crypt.decodeBase64(token);
+        emailVerificationService.validateEmail(email);
+        emailVerificationService.validateAlreadyActive(email);
+        emailVerificationService.setUserAccountActiveWith(email);
+        return Response.<UserResponse>builder().message("Email Verification is successfully").result(UserResponse.SUCCESS).build();
     }
 
 }

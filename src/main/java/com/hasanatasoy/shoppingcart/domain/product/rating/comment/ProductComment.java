@@ -1,16 +1,21 @@
 package com.hasanatasoy.shoppingcart.domain.product.rating.comment;
 
+import com.hasanatasoy.shoppingcart.base.domain.BaseModel;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity
-public class ProductComment {
+@Table(name = "product_comment")
+@SequenceGenerator(name = "productcommentgenerator", sequenceName = "product_comment_seq")
+@Getter
+@Setter
+public class ProductComment extends BaseModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
     @NotNull
     private String commentator;
     @NotNull
@@ -25,14 +30,4 @@ public class ProductComment {
     @Temporal(TemporalType.DATE)
     private Date updatedAt;
     private int commentLike = 0;
-
-    @PrePersist
-    public void onCreate(){
-        createdAt = new Date();
-    }
-
-    @PostPersist
-    public void onUpdate(){
-        updatedAt = new Date();
-    }
 }

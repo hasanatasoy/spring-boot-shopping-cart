@@ -12,7 +12,7 @@ import java.util.Date;
 public class BaseModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private boolean isDeleted = false;
     private Date createdAt;

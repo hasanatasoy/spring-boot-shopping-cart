@@ -1,4 +1,4 @@
-package com.hasanatasoy.shoppingcart.dto.login;
+package com.hasanatasoy.shoppingcart.base.messages.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,8 +13,7 @@ import javax.validation.constraints.Size;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
-
+public class RequestLogin {
     @NotNull
     @Email
     @Size(min = 11, max = 50)

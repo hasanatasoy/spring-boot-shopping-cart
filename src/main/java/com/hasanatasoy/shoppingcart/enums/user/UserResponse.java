@@ -11,5 +11,5 @@ public enum UserResponse {
     EXISTEMAIL,
     SUCCESS,
     UNAUTHENTICATION,
-    UNAUTHORIZATION
+    UNAUTHORİZED
 }

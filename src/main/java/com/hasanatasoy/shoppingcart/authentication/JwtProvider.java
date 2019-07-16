@@ -1,6 +1,6 @@
 package com.hasanatasoy.shoppingcart.authentication;
 
-import com.hasanatasoy.shoppingcart.dto.login.LoginDTO;
+import com.hasanatasoy.shoppingcart.base.messages.request.RequestLogin;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,19 +15,19 @@ public class JwtProvider {
     private String secretKey;
     private int expiration = 300000;
 
-    public String generateJsonWebToken(LoginDTO loginDTO){
+    public String generateJsonWebToken(RequestLogin requestLogin){
         return Jwts.builder()
-                .setSubject(loginDTO.getEmail()+" "+loginDTO.getPassword())
+                .setSubject(requestLogin.getEmail()+" "+requestLogin.getPassword())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime()+expiration))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    public LoginDTO getLoginDtoFrom(String token){
+    public RequestLogin getLoginDtoFrom(String token){
         String subject = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         String[] login = subject.split(" ");
-        return new LoginDTO(login[0],login[1]);
+        return new RequestLogin(login[0],login[1]);
     }
 
     public boolean validateJsonWebToken(String token){

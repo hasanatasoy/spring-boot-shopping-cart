@@ -1,8 +1,8 @@
 package com.hasanatasoy.shoppingcart.domain.product;
 
 import com.hasanatasoy.shoppingcart.base.domain.BaseModel;
-import com.hasanatasoy.shoppingcart.domain.category.subcategory.SubCategory;
-import com.hasanatasoy.shoppingcart.domain.product.color.ProductColor;
+import com.hasanatasoy.shoppingcart.domain.category.Category;
+import com.hasanatasoy.shoppingcart.domain.product.images.ProductImage;
 import com.hasanatasoy.shoppingcart.domain.product.info.ProductInfo;
 import com.hasanatasoy.shoppingcart.domain.product.rating.ProductRating;
 import lombok.Getter;
@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
+@SequenceGenerator(name = "productgenerator", sequenceName = "product_seq")
 @Getter
 @Setter
 public class Product extends BaseModel {
@@ -25,12 +26,12 @@ public class Product extends BaseModel {
     private ProductRating productRating;
     @OneToMany(fetch = FetchType.LAZY)
     @NotNull
-    private List<ProductColor> productColors;
+    private List<ProductImage> productImages;
     @OneToOne(fetch = FetchType.LAZY)
     @NotNull
     private ProductInfo productInfo;
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<SubCategory> categories;
+    @OneToOne(fetch = FetchType.LAZY)
+    private Category category;
 
 
 }

@@ -1,5 +1,6 @@
 package com.hasanatasoy.shoppingcart.domain.order;
 
+import com.hasanatasoy.shoppingcart.base.domain.BaseModel;
 import com.hasanatasoy.shoppingcart.domain.address.Address;
 import com.hasanatasoy.shoppingcart.domain.cart.Cart;
 import com.hasanatasoy.shoppingcart.domain.order.payment.PaymentType;
@@ -12,13 +13,11 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "orders")
+@SequenceGenerator(name = "ordergenerator", sequenceName = "order_seq")
 @Getter
 @Setter
-public class Order {
+public class Order extends BaseModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
     @OneToOne
     private Address orderAddress;
     @OneToOne

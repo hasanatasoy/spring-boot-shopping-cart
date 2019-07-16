@@ -1,15 +1,12 @@
 package com.hasanatasoy.shoppingcart.service;
 
-import com.hasanatasoy.shoppingcart.domain.user.User;
-import com.hasanatasoy.shoppingcart.domain.user.UserRepository;
-import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfo;
-import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuthInfoRepository;
+import com.hasanatasoy.shoppingcart.authentication.Crypt;
+import com.hasanatasoy.shoppingcart.domain.user.authinfo.UserAuth;
+import com.hasanatasoy.shoppingcart.exceptionhandler.base.exception.BadRequestExcepiton;
+import com.hasanatasoy.shoppingcart.exceptionhandler.base.exception.ForbiddenException;
+import com.hasanatasoy.shoppingcart.service.user.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Optional;
 
 @Service
 public class EmailService {
@@ -17,42 +14,37 @@ public class EmailService {
     private String URL = "localhost:8080";
 
     @Autowired
-    UserRepository userRepository;
-    @Autowired
-    UserAuthInfoRepository userAuthInfoRepository;
+    UserAuthService userAuthService;
 
     public void sendEmailVerificationTo(String email) {
-        String encodedEmail = encodeBase64(email);
+        String encodedEmail = Crypt.encodeBase64(email);
         sendEmailWith(URL+"/verify/email/"+encodedEmail);
-    }
-
-    private String encodeBase64(String toBeEncoded) {
-        return Base64.getEncoder().encodeToString(toBeEncoded.getBytes());
     }
 
     private void sendEmailWith(String verificationPath) {
         System.out.println(verificationPath);
     }
 
-    public String decodeBase64(String toBeDecoded){
-        byte[] decodedByteArray = Base64.getDecoder().decode(toBeDecoded.getBytes());
-        return new String(decodedByteArray);
+    public void validateEmail(String targetEmail){
+        boolean isNotMatched = !userAuthService.findBy(targetEmail).isPresent();
+        if(isNotMatched)
+            throw new ForbiddenException("You don't have permission");
     }
 
-    public boolean isEmailMatched(String targetEmail){
-        Optional<UserAuthInfo> userAuthInfo = userAuthInfoRepository.findByEmail(targetEmail);
-        return userAuthInfo.isPresent();
+    public void setUserAccountActiveWith(String email){
+        UserAuth userAuth = userAuthService.findBy(email).get();
+        userAuth.setAccountEnabled(true);
+        userAuthService.save(userAuth);
     }
 
-    public void setUserAccountActive(String email){
-        UserAuthInfo userAuthInfo = userAuthInfoRepository.findByEmail(email).get();
-        User user = userRepository.findByUserAuthInfo(userAuthInfo).get();
-        user.setAccountEnabled(true);
-        userRepository.save(user);
+    public void sendResetPasswordUrlWith(String targetEmail, String secureCode) {
+        UserAuth userAuth = userAuthService.findBy(targetEmail).get();
+        System.out.println(URL+"/authentication/resetpass/"+userAuth.getId()+"/"+secureCode);
     }
 
-    public void sendResetPasswordPageWith(String targetEmail, Long authId, String secureCode) {
-        System.out.println(URL+"/authentication/resetpass/"+authId+"/"+secureCode);
+    public void validateAlreadyActive(String email) {
+        UserAuth userAuth = userAuthService.findBy(email).get();
+        if(userAuth.isAccountEnabled())
+            throw new BadRequestExcepiton("User account already active");
     }
-
 }

@@ -1,5 +1,6 @@
 package com.hasanatasoy.shoppingcart.domain.product.rating;
 
+import com.hasanatasoy.shoppingcart.base.domain.BaseModel;
 import com.hasanatasoy.shoppingcart.domain.product.rating.comment.ProductComment;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,13 +10,12 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Entity
+@Table(name = "product_rating")
+@SequenceGenerator(name = "productratinggenerator", sequenceName = "product_rating_seq")
 @Getter
 @Setter
-public class ProductRating {
+public class ProductRating extends BaseModel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
     @OneToMany
     private List<ProductComment> productComments;
     @NotNull
