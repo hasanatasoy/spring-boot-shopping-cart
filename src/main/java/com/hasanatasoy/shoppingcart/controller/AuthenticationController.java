@@ -49,11 +49,11 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/forgotpass", method = RequestMethod.POST)
-    public Response<UserResponse> forgatPassword(@RequestBody String email){
+    public Response<UserResponse> forgotPassword(@RequestBody String email){
         userAuthService.validateIs(email);
         userAuthService.validateDoesExist(email);
         String secureCode = Crypt.generateSecureCodeWith(email);
-        emailService.sendResetPasswordUrlWith(email, secureCode);
+        emailService.sendResetPasswordUrlWith(secureCode);
         return Response.<UserResponse>builder().result(UserResponse.SUCCESS).message("Your new password successfully sent.").build();
     }
 

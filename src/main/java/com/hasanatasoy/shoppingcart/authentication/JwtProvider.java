@@ -24,7 +24,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public RequestLogin getLoginDtoFrom(String token){
+    public RequestLogin getRequestLoginFrom(String token){
         String subject = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         String[] login = subject.split(" ");
         return new RequestLogin(login[0],login[1]);

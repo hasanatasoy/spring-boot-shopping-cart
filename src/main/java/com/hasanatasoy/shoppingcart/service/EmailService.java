@@ -25,26 +25,7 @@ public class EmailService {
         System.out.println(verificationPath);
     }
 
-    public void validateEmail(String targetEmail){
-        boolean isNotMatched = !userAuthService.findBy(targetEmail).isPresent();
-        if(isNotMatched)
-            throw new ForbiddenException("You don't have permission");
-    }
-
-    public void setUserAccountActiveWith(String email){
-        UserAuth userAuth = userAuthService.findBy(email).get();
-        userAuth.setAccountEnabled(true);
-        userAuthService.save(userAuth);
-    }
-
-    public void sendResetPasswordUrlWith(String targetEmail, String secureCode) {
-        UserAuth userAuth = userAuthService.findBy(targetEmail).get();
-        System.out.println(URL+"/authentication/resetpass/"+userAuth.getId()+"/"+secureCode);
-    }
-
-    public void validateAlreadyActive(String email) {
-        UserAuth userAuth = userAuthService.findBy(email).get();
-        if(userAuth.isAccountEnabled())
-            throw new BadRequestExcepiton("User account already active");
+    public void sendResetPasswordUrlWith(String secureCode) {
+        System.out.println(URL+"/authentication/resetpass/"+secureCode);
     }
 }

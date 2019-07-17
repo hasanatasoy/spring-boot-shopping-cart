@@ -2,6 +2,7 @@ package com.hasanatasoy.shoppingcart.exceptionhandler;
 
 import com.hasanatasoy.shoppingcart.exceptionhandler.base.exception.BadRequestExcepiton;
 import com.hasanatasoy.shoppingcart.exceptionhandler.base.exception.ForbiddenException;
+import com.hasanatasoy.shoppingcart.exceptionhandler.category.CategoryNotFoundException;
 import com.hasanatasoy.shoppingcart.exceptionhandler.user.UserNotFoundException;
 import com.hasanatasoy.shoppingcart.exceptionhandler.user.userauth.UserAuthNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class CustomExcepitonHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, UserAuthNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, UserAuthNotFoundException.class, CategoryNotFoundException.class})
     public ResponseEntity<ErrorResponse> notFoundException(Exception exception){
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);

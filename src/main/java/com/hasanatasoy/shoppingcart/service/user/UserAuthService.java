@@ -18,8 +18,12 @@ public class UserAuthService {
     @Autowired
     UserAuthRepository userAuthRepository;
 
-    public Optional<UserAuth> findBy(String email){
-        return userAuthRepository.findByEmail(email);
+    public UserAuth findBy(String email){
+        Optional<UserAuth> userAuth = userAuthRepository.findByEmail(email);
+        boolean emailDoesNotExist = userAuth.isPresent();
+        if(emailDoesNotExist)
+            throw new UserAuthNotFoundException(email);
+        return userAuth.get();
     }
 
     public void save(UserAuth userAuth) {
@@ -27,33 +31,25 @@ public class UserAuthService {
     }
 
     public void validateDoesNotExist(String email) {
-        boolean emailDoesExist = findBy(email).isPresent();
+        boolean emailDoesExist = userAuthRepository.findByEmail(email).isPresent();
         if(emailDoesExist)
             throw new BadRequestExcepiton("Email already taken");
     }
 
     public void validateDoesExist(String email){
-        boolean emailDoesNotExist = !findBy(email).isPresent();
-        if(emailDoesNotExist)
-            throw new UserAuthNotFoundException(email);
+        findBy(email);
     }
 
     public void validateUserAccountActive(String email){
-        Optional<UserAuth> userAuth = findBy(email);
-        boolean doesNotExistEmail = !userAuth.isPresent();
-        if(doesNotExistEmail)
-            throw new UserAuthNotFoundException(email);
-        boolean isAccountNotEnabled = !userAuth.get().isAccountEnabled();
+        UserAuth userAuth = findBy(email);
+        boolean isAccountNotEnabled = !userAuth.isAccountEnabled();
         if(isAccountNotEnabled)
             throw new ForbiddenException("Account not active");
     }
 
     public void validateEmailAndPasswordCorrect(String email, String password) {
-        Optional<UserAuth> userAuth = findBy(email);
-        boolean doesNotExistEmail = !userAuth.isPresent();
-        if(doesNotExistEmail)
-            throw new UserAuthNotFoundException(email);
-        boolean isPasswordNotCorrect = !Crypt.isMatched(password, userAuth.get().getPassword());
+        UserAuth userAuth = findBy(email);
+        boolean isPasswordNotCorrect = !Crypt.isMatched(password, userAuth.getPassword());
         if(isPasswordNotCorrect)
             throw new BadRequestExcepiton("Password is not correct");
     }
@@ -70,8 +66,20 @@ public class UserAuthService {
             throw new ForbiddenException("You don't have permission");
     }
 
+    public void validateAlreadyActive(String email) {
+        UserAuth userAuth = findBy(email);
+        if(userAuth.isAccountEnabled())
+            throw new BadRequestExcepiton("User account already active");
+    }
+
+    public void setUserAccountActiveWith(String email){
+        UserAuth userAuth = findBy(email);
+        userAuth.setAccountEnabled(true);
+        save(userAuth);
+    }
+
     public void setUserPassword(String email, String password){
-        UserAuth userAuth = findBy(email).get();
+        UserAuth userAuth = findBy(email);
         String encodedPassword = Crypt.encode(password);
         userAuth.setPassword(encodedPassword);
         userAuthRepository.save(userAuth);
